@@ -3,8 +3,23 @@ Write a query to print the respective hacker_id and name of hackers who achieved
 Order your output in descending order by the total number of challenges in which the hacker earned a full score. 
 If more than one hacker received full scores in same number of challenges, then sort them by ascending hacker_id.
 
-Input Format
 
-The following tables contain contest data:
 
-Hackers: The hacker_id is the id of the hacker, and name is the name of the hacker. 
+My solution 
+```
+SELECT h.hacker_id, h.name
+FROM Hackers h
+JOIN (
+    SELECT s.hacker_id, COUNT(DISTINCT s.challenge_id) AS full_score_challenges
+    FROM Submissions s
+    JOIN (
+        SELECT c.challenge_id, c.difficulty_level, d.score AS max_score
+        FROM Challenges c
+        JOIN Difficulty d ON c.difficulty_level = d.difficulty_level
+    ) AS challenge_scores ON s.challenge_id = challenge_scores.challenge_id
+    WHERE s.score = challenge_scores.max_score
+    GROUP BY s.hacker_id
+    HAVING COUNT(DISTINCT s.challenge_id) > 1
+) AS full_score_hackers ON h.hacker_id = full_score_hackers.hacker_id
+ORDER BY full_score_hackers.full_score_challenges DESC, h.hacker_id ASC
+```
