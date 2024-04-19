@@ -5,7 +5,7 @@ If more than one hacker received full scores in same number of challenges, then 
 
 
 
-My solution 
+My solution:
 
 SELECT h.hacker_id, h.name
 FROM Hackers h
@@ -22,5 +22,46 @@ JOIN (
     HAVING COUNT(DISTINCT s.challenge_id) > 1
 ) AS full_score_hackers ON h.hacker_id = full_score_hackers.hacker_id
 ORDER BY full_score_hackers.full_score_challenges DESC, h.hacker_id ASC
+
+
+My explanation: 
+
+My first approach to this problem is to join tale Challenges and Difficulty so I know what the highest score of each challenge has. 
+I use JOIN clause to join two tables.
+
+    SELECT c.challenge_id, c.difficulty_level, d.score AS max_score
+            FROM Challenges c
+            JOIN Difficulty d ON c.difficulty_level = d.difficulty_level
+
+
+
+Then I join table Submisisons with the table above to compare the max_score and score each hacker earned. 
+At the same time, I count the number of challenges each hacker has done using COUNT statement, 
+and filter out the hackers earning max score that using WHERE function.
+Since there is aggregation COUNT in the SELECT statement, I use GROUP BY to group column hacker_id. 
+HAVING COUNT(DISTINCT s.challenge_id) > 1 is used to return the hacker_id that has done more than 1 challenge full score. 
+
+    SELECT s.hacker_id, COUNT(DISTINCT s.challenge_id) AS full_score_challenges
+        FROM Submissions s
+        JOIN ...
+        AS challenge_scores ON s.challenge_id = challenge_scores.challenge_id
+        WHERE s.score = challenge_scores.max_score
+        GROUP BY s.hacker_id
+        HAVING COUNT(DISTINCT s.challenge_id) > 1
+
+
+
+Now I have a table of hacker_id and number of challenges which they earned highest points. 
+I join the table above with table Hackers to get the hackers's name. Then I use ORDER BY clause to sort the results.
+
+    SELECT h.hacker_id, h.name
+        FROM Hackers h
+        JOIN ... 
+        AS full_score_hackers 
+        ON h.hacker_id = full_score_hackers.hacker_id
+        ORDER BY full_score_hackers.full_score_challenges DESC, h.hacker_id ASC
+
+
+
 
 
